@@ -18,10 +18,11 @@ export function getOrbitportSDK(): OrbitportSDK {
   const authDomain = process.env.ORBITPORT_AUTH_DOMAIN;
 
   if (clientId && clientSecret) {
-    // Use file token storage to persist the JWT token across restarts/reloads
+    // Use memory token storage on serverless environments (like Vercel) to avoid EROFS (read-only file system) crashes
+    const isServerless = !!process.env.VERCEL || !!process.env.LAMBDA_TASK_ROOT;
     const storage = createStorage({
-      type: "file",
-      filePath: ".orbitport_token",
+      type: isServerless ? "memory" : "file",
+      filePath: isServerless ? undefined : ".orbitport_token",
     });
 
     cachedSDK = new OrbitportSDK({
