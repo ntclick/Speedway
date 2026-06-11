@@ -514,6 +514,25 @@ export default function OrbitRushHome() {
       });
     });
 
+    // Big glowing countdown text below the starting lights panel
+    ctx.save();
+    ctx.fillStyle = val === "GO" ? "#00e5a0" : "#ffffff";
+    ctx.font = val === "GO" ? "900 80px Orbitron, monospace" : "900 96px Orbitron, monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.shadowBlur = 30;
+    ctx.shadowColor = val === "GO" ? "rgba(0, 229, 160, 0.85)" : "rgba(0, 212, 255, 0.85)";
+    
+    // Draw the number centered vertically below the F1 lights panel
+    ctx.fillText(val.toString(), cx, cy + 130);
+    
+    // Sub-label below the number
+    ctx.fillStyle = "rgba(255, 255, 255, 0.65)";
+    ctx.font = "bold 11px Orbitron, sans-serif";
+    ctx.shadowBlur = 0;
+    ctx.fillText(val === "GO" ? "LANES CLEARED" : "ENGAGING ENCLAVE", cx, cy + 190);
+    ctx.restore();
+
     ctx.restore();
   }, []);
 
@@ -725,7 +744,7 @@ export default function OrbitRushHome() {
 
     if (gameStateRef.current === "racing") {
       elapsed = (timestamp - raceStartTime.current) / 1000;
-      const raceDuration = 10;
+      const raceDuration = 14;
       progress = elapsed / raceDuration;
       if (progress > 1) {
         progress = 1;
@@ -769,40 +788,100 @@ export default function OrbitRushHome() {
       ctx.translate(drawX, drawY);
 
       if (item.type === "buff") {
-        // Glowing spinning green/gold neon crystal
-        ctx.rotate(Date.now() / 250);
-        ctx.fillStyle = item.color;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = item.color;
+        // Glowing spinning green/gold neon crystal with orbital rings
+        const time = Date.now();
+        
+        // Draw orbital rings
+        ctx.save();
+        ctx.strokeStyle = item.color;
+        ctx.lineWidth = 0.8;
+        ctx.globalAlpha = 0.55;
+        
+        // Ring 1
+        ctx.save();
+        ctx.rotate(time / 280);
         ctx.beginPath();
-        ctx.moveTo(0, -7);
-        ctx.lineTo(5, 0);
-        ctx.lineTo(0, 7);
-        ctx.lineTo(-5, 0);
-        ctx.closePath();
-        ctx.fill();
+        ctx.ellipse(0, 0, 11, 4, 0, 0, 2 * Math.PI);
+        ctx.stroke();
+        ctx.restore();
+        
+        // Ring 2
+        ctx.save();
+        ctx.rotate(-time / 200 + Math.PI / 4);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 11, 4, 0, 0, 2 * Math.PI);
+        ctx.stroke();
+        ctx.restore();
+        ctx.restore();
 
-        // Inner glowing core
-        ctx.fillStyle = "#ffffff";
-        ctx.beginPath();
-        ctx.arc(0, 0, 2, 0, 2 * Math.PI);
-        ctx.fill();
-      } else {
-        // Glowing red/orange hazard mine/spike
+        // Glowing crystal core
+        ctx.save();
+        ctx.rotate(time / 400);
         ctx.fillStyle = item.color;
         ctx.shadowBlur = 12;
         ctx.shadowColor = item.color;
         ctx.beginPath();
-        ctx.moveTo(0, -6);
-        ctx.lineTo(6, 5);
-        ctx.lineTo(-6, 5);
+        ctx.moveTo(0, -8);
+        ctx.lineTo(5.5, 0);
+        ctx.lineTo(0, 8);
+        ctx.lineTo(-5.5, 0);
         ctx.closePath();
         ctx.fill();
+        ctx.restore();
 
-        // Warning core sign
-        ctx.fillStyle = "#000000";
-        ctx.fillRect(-1, -1, 2, 3);
-        ctx.fillRect(-1, 3, 2, 1);
+        // Inner glowing white core
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(0, 0, 2.2, 0, 2 * Math.PI);
+        ctx.fill();
+      } else {
+        // Glowing space mine with spikes and pulsing warning radius
+        const time = Date.now();
+        const pulse = 0.12 + 0.08 * Math.sin(time / 140);
+        
+        // Pulse warning radius circle
+        ctx.save();
+        ctx.fillStyle = item.color;
+        ctx.globalAlpha = pulse;
+        ctx.beginPath();
+        ctx.arc(0, 0, 15, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.restore();
+
+        // Spikes extending outward (6 directions)
+        ctx.save();
+        ctx.strokeStyle = item.color;
+        ctx.lineWidth = 1.6;
+        for (let i = 0; i < 6; i++) {
+          ctx.save();
+          ctx.rotate((i * Math.PI) / 3 + time / 1000);
+          ctx.beginPath();
+          ctx.moveTo(0, -4);
+          ctx.lineTo(0, -9);
+          ctx.stroke();
+          ctx.restore();
+        }
+        ctx.restore();
+
+        // Core mine body sphere
+        ctx.save();
+        ctx.fillStyle = "#1e1026";
+        ctx.strokeStyle = item.color;
+        ctx.lineWidth = 1.2;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = item.color;
+        ctx.beginPath();
+        ctx.arc(0, 0, 5.5, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+
+        // Warning pulsing indicator light in the center
+        const warningColor = Math.floor(time / 250) % 2 === 0 ? "#ff0000" : "#000000";
+        ctx.fillStyle = warningColor;
+        ctx.beginPath();
+        ctx.arc(0, 0, 1.8, 0, 2 * Math.PI);
+        ctx.fill();
       }
       ctx.restore();
     });
@@ -896,7 +975,7 @@ export default function OrbitRushHome() {
 
       // Decay speedModifier for this frame during active racing
       if (gameStateRef.current === "racing") {
-        vars.speedModifier *= 0.95;
+        vars.speedModifier *= 0.982;
       }
 
       const { x, y, angle } = getPathPoint(RACE_PATH, carP);
@@ -916,7 +995,7 @@ export default function OrbitRushHome() {
             item.active = false;
             
             if (item.type === "buff") {
-              vars.speedModifier += 0.045; // Surge forward!
+              vars.speedModifier += 0.08; // Surge forward!
               addLog(`⚡ Car #${carIdx + 1} (${CAR_NAMES[carIdx]}) collected ${item.name} power-up!`);
               // Spawn green sparks
               for (let pIdx = 0; pIdx < 15; pIdx++) {
@@ -932,7 +1011,7 @@ export default function OrbitRushHome() {
                 );
               }
             } else {
-              vars.speedModifier -= 0.055; // Decelerate/lag behind!
+              vars.speedModifier -= 0.09; // Decelerate/lag behind!
               addLog(`⚠️ Car #${carIdx + 1} (${CAR_NAMES[carIdx]}) hit ${item.name} obstacle!`);
               // Spawn warning smoke/sparks
               for (let pIdx = 0; pIdx < 15; pIdx++) {
@@ -1652,59 +1731,9 @@ export default function OrbitRushHome() {
                   <div className="scanline" style={{ borderRadius: 8 }} />
                 )}
 
-                {/* 3. React-based High-Fidelity Countdown Text Overlay */}
+                {/* 3. React-based High-Fidelity Countdown Text Overlay removed to render directly on canvas */}
                 <AnimatePresence mode="wait">
-                  {gameState === "countdown" && countdownVal !== null && (
-                    <motion.div
-                      key={countdownVal}
-                      initial={{ scale: 3.5, opacity: 0, filter: "blur(6px)" }}
-                      animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
-                      exit={{ scale: 0.4, opacity: 0, filter: "blur(10px)" }}
-                      transition={{ type: "spring", stiffness: 350, damping: 16 }}
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        pointerEvents: "none",
-                        zIndex: 20,
-                        background: "rgba(3, 3, 12, 0.25)",
-                        borderRadius: 8
-                      }}
-                    >
-                      <motion.div
-                        animate={{ rotate: [0, -2, 2, 0] }}
-                        transition={{ duration: 0.5 }}
-                        style={{
-                          fontFamily: "Orbitron, monospace",
-                          fontSize: countdownVal === "GO" ? "5.5rem" : "6.5rem",
-                          fontWeight: 900,
-                          color: countdownVal === "GO" ? "var(--text-success)" : "#ffffff",
-                          textShadow: countdownVal === "GO" 
-                            ? "0 0 30px rgba(0, 229, 160, 0.85), 0 0 10px rgba(0, 229, 160, 0.5)" 
-                            : "0 0 35px rgba(0, 212, 255, 0.85), 0 0 10px rgba(0, 212, 255, 0.4)",
-                          letterSpacing: "0.05em",
-                        }}
-                      >
-                        {countdownVal}
-                      </motion.div>
-                      <motion.p
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 0.65, y: 0 }}
-                        style={{
-                          fontSize: "0.72rem",
-                          letterSpacing: "0.2em",
-                          color: "#ffffff",
-                          marginTop: "0.5rem",
-                          textTransform: "uppercase"
-                        }}
-                      >
-                        {countdownVal === "GO" ? "Lanes Cleared" : "Engaging Enclave"}
-                      </motion.p>
-                    </motion.div>
-                  )}
+                  {/* Countdown overlay text is now rendered directly on the Canvas context to prevent HTML layout breakages */}
                 </AnimatePresence>
 
                 <canvas
