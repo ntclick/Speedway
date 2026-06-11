@@ -1,30 +1,30 @@
-# Orbitport Playground
+# Cosmic Speedway
 
-A developer playground for [SpaceComputer](https://spacecomputer.io) Orbitport.
+Cosmic Speedway is a premium, high-fidelity, deterministic space racing game powered by [SpaceComputer](https://spacecomputer.io) Orbitport cTRNG (Cosmic True Random Number Generator) and KMS. 
 
-Generate cosmic randomness, inspect response metadata, test deterministic examples, and copy integration snippets for your own app.
-
-> **Developer demo.** Not for production cryptographic custody or wallet seed generation without a full security review.
+Analyze randomized spaceship telemetry, place your wagers, and watch a weighted, provably fair space derby unfold on a widescreen neon cyberpunk racetrack.
 
 ---
 
-## What Is This?
+## Key Features
 
-Orbitport Playground is an interactive web app that makes [SpaceComputer Orbitport](https://docs.spacecomputer.io) tangible for developers:
-
-- Open the app → click **Generate** → get **cosmic randomness**
-- Inspect the source, service, timestamp, and proof metadata
-- Copy ready-to-use TypeScript/Next.js integration code
-- Run deterministic raffle, dice, and NFT trait demos from the same random value
-- Read from the public IPFS randomness beacon — no credentials needed
+- **Provably Fair Space Derby:** Race outcomes are determined on-chain/in-enclave by true cosmic randomness harvested from space radiation, rendering the game mathematically unbiased and externally verifiable.
+- **Full-Width Widescreen Arena (`1200x600`):** Experience high-fidelity space racing on a scaled highway track featuring custom-drawn lane markers, checkered finish lines, and dynamic starfield drifts.
+- **Holographic Spacecraft Chambers:** Interactive cockpit selection cards displaying floating 3D-feeling spacecraft holograms, neon mini spec-meters, and unique active auras matching their signature colors.
+- **Cosmic Buffs & Hazards:** Races feature dynamically generated racetrack items. Spaceships surge forward with green sparks upon collecting power-ups (Quantum Packs, Warp Cores, Shield Cells) or lag behind with exhaust smoke upon striking obstacles (EMP Mines, Space Junk, Plasma Clouds) using decaying physics that preserve seed-based winners.
+- **Dynamic Overtaking Wobbles:** Realistic sinusoidal overtaking maneuvers where ships swap leads dynamically during the race, converging precisely at the finish line according to the predetermined entropy seed.
+- **Local Vocal Announcer:** Opt-in native browser `SpeechSynthesis` commentator calling out countdown status, leaders telemetry, and race results.
+- **Cryptographic Attestation Proofs:** Developer verification tab showing SHA256 seed hashing formulas, satellite enclaves public key checks, and IPFS beacon signatures.
 
 ---
 
-## What Is SpaceComputer cTRNG?
+## How It Works (Deterministic Fairness)
 
-**cTRNG** (Cosmic True Random Number Generator) is SpaceComputer's satellite-backed entropy service. It harvests randomness from cosmic radiation detected by satellite hardware, making the output genuinely unbiased and externally verifiable.
-
-Access is provided through the **Orbitport** API gateway and SDK.
+Cosmic Speedway uses a hybrid cryptographic seed generation flow:
+1. **Satellite cTRNG API:** Fetches true cosmic radiation entropy signed inside SpaceComputer's orbital hardware enclave.
+2. **KMS & IPFS Fallback:** If the API falls back to the static 60s IPFS beacon, the system hashes the IPFS block with the KMS signature:
+   $$\text{Seed} = \text{SHA256}(\text{IPFS\_Beacon} + \text{KMS\_Signature})$$
+3. **Derived Winners:** The spaceship specifications and race velocities are derived deterministically using modulo math on slices of this seed. This guarantees that whoever holds the winning slice takes 1st place, making the race verifiable and reproducible.
 
 ---
 
@@ -32,147 +32,45 @@ Access is provided through the **Orbitport** API gateway and SDK.
 
 | Technology | Purpose |
 |---|---|
-| Next.js 15 (App Router) | Framework, server routes |
-| TypeScript | Type safety |
-| Tailwind CSS | Styling base |
-| `@spacecomputer-io/orbitport-sdk-ts` | Orbitport SDK |
-| `lucide-react` | Icons |
+| **Next.js 16 (App Router)** | Web application framework and server routes |
+| **React 19 & TypeScript** | Component rendering and type safety |
+| **Motion** | Spring animations for cockpit wagers and holographic cards |
+| **HTML5 Canvas (2D)** | 60 FPS gameplay, particle systems, and neon rendering |
+| **`@spacecomputer-io/orbitport-sdk-ts`** | Satellite cTRNG & KMS API interface |
 
 ---
 
-## Setup
+## Setup & Running Locally
 
 ### Prerequisites
-
 - Node.js 20+
 - npm
 
-### 1. Clone or download
-
-```bash
-cd "Orbitport Playground/orbitport-playground"
-```
-
-### 2. Install dependencies
-
+### 1. Install Dependencies
 ```bash
 npm install
 ```
 
-### 3. Configure environment variables
-
+### 2. Configure Environment Variables
+Copy the example environment template:
 ```bash
 cp .env.example .env.local
 ```
+*(Optional)* Add your client credentials inside `.env.local` to enable official signature checks:
+- `ORBITPORT_CLIENT_ID`
+- `ORBITPORT_CLIENT_SECRET`
 
-Then edit `.env.local` with your credentials (optional — see below).
+If left blank, the game runs in public **IPFS-Only Beacon Mode** automatically.
 
-### 4. Run locally
-
+### 3. Run Development Server
 ```bash
 npm run dev
 ```
-
-Open [http://localhost:3000](http://localhost:3000).
-
----
-
-## Environment Variables
-
-| Variable | Required | Description |
-|---|---|---|
-| `ORBITPORT_CLIENT_ID` | Optional | Your Orbitport client ID |
-| `ORBITPORT_CLIENT_SECRET` | Optional | Your Orbitport client secret |
-| `ORBITPORT_API_URL` | Optional | Orbitport base URL (default: `https://op.spacecomputer.io`) |
-| `ORBITPORT_AUTH_URL` | Optional | Auth0 URL for credentials (default provided) |
-
-Get credentials at [accounts.spacecomputer.io](https://accounts.spacecomputer.io/).
+Open [http://localhost:5669](http://localhost:5669) in your browser.
 
 ---
 
-## How Credential Mode Works
+## Security & Verification
 
-If `ORBITPORT_CLIENT_ID` and `ORBITPORT_CLIENT_SECRET` are both set in `.env.local`:
-
-1. The backend initializes `OrbitportSDK` with full credentials.
-2. The SDK authenticates via Auth0 OAuth2 client credentials flow.
-3. The API fetches randomness from the full Orbitport API endpoint.
-4. The response may include satellite cryptographic signature metadata.
-
-The UI will show **API Mode** badge.
-
----
-
-## How IPFS-Only Mode Works
-
-If credentials are **not set**:
-
-1. The backend initializes `OrbitportSDK` with an empty config: `new OrbitportSDK({ config: {} })`.
-2. The SDK routes through the public SpaceComputer IPFS randomness beacon.
-3. No authentication is required.
-
-The UI will show **IPFS Beacon** badge and a note that no API signature is available in this mode.
-
-The public beacon URL is:
-```
-https://ipfs.io/ipns/k2k4r8lvomw737sajfnpav0dpeernugnryng50uheyk1k39lursmn09f
-```
-
-It updates approximately every 60 seconds.
-
----
-
-## How Deterministic Examples Work
-
-The **Mini Examples** tab (dice, raffle, NFT traits) never generates new randomness independently.
-
-They use the **last cosmic hex value** generated in the cTRNG tab.
-
-Formula used for raffle:
-```ts
-const index = Number(BigInt("0x" + randomHex) % BigInt(participants.length));
-const winner = participants[index];
-```
-
-This means: the same cosmic hex + same participant list → always the same winner. **Verifiable and reproducible.**
-
----
-
-## Security Notes
-
-- `ORBITPORT_CLIENT_SECRET` is **never** sent to the browser. All credential-based calls go through Next.js server API routes (`/api/ctrng/random`).
-- The browser only ever calls your own backend at `/api/ctrng/random` or `/api/beacon/latest`.
-- `Math.random()` is **never used** as a fallback for randomness. If the source fails, the app returns an explicit error.
-- No signature verification is implemented in this demo — displayed metadata is for inspection only.
-
----
-
-## Limitations
-
-- This is a **developer demo** — not production-grade cryptographic infrastructure.
-- The IPFS beacon response does not include the same API signature that a credentialed API call may provide.
-- Signature verification is shown in the UI but **not cryptographically verified** in this app.
-- IPFS gateways can be slow or temporarily unavailable. The beacon route tries 3 fallback gateways.
-- The SDK response shape may vary between SDK versions. If `result.data.data` is missing, the API returns a `MISSING_RANDOM_DATA` error with the raw response for inspection.
-
----
-
-## Future Roadmap
-
-- [ ] KMS demo tab (key generation, sign/encrypt/decrypt)
-- [ ] OrbitRaffle export card (shareable winner proof image)
-- [ ] Historical IPFS beacon explorer
-- [ ] Verification page (paste hex + participants → recalculate winner)
-- [ ] Deploy to Vercel with one-click deploy button
-
----
-
-## References
-
-- [SpaceComputer Website](https://spacecomputer.io)
-- [Orbitport Docs](https://docs.spacecomputer.io)
-- [SDK Quickstart](https://docs.spacecomputer.io/docs/how-to/sdk-quickstart)
-- [IPFS Beacon Docs](https://docs.spacecomputer.io/docs/how-to/ipfs-beacon)
-- [SDK GitHub](https://github.com/spacecomputer-io/orbitport-sdk-ts)
-- [Demo Repo](https://github.com/spacecomputer-io/spacecomputer-orbitport-demo)
-- [Get API Credentials](https://accounts.spacecomputer.io/)
+- **Secure Secrets:** API secrets are only handled server-side. The client calls safe server routes (`/api/ctrng/random` and `/api/beacon/latest`) to request randomness.
+- **Anti-Manipulation:** The game uses zero client-side pseudo-randomness (`Math.random`) for physics or racing outcomes. Every movement, collision, and lead change is bound to the verifiable satellite payload.
